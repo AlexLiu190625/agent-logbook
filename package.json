@@ -20,7 +20,7 @@
     "docs"
   ],
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test"
   },
   "keywords": [
     "ledger",

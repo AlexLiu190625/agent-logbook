@@ -1,6 +1,6 @@
 ---
 name: logbook
-description: Record work in the repository's markdown logbook. Use after finishing a piece of work that produced a decision or a verified fact — a choice between options, a root cause, a benchmark result, a discovered constraint — and whenever an earlier logbook entry turns out to be wrong. Also use when asked what was decided before, or why the code is the way it is.
+description: Read and write the repository's markdown logbook. Use at the start of a task, before the first edit, to pick up what earlier sessions decided and verified. Use again after finishing work that produced a decision or a verified fact — a choice between options, a root cause, a benchmark result, a discovered constraint — and whenever an earlier logbook entry turns out to be wrong. Also use when asked what was decided before, or why the code is the way it is.
 ---
 
 # Logbook
@@ -12,6 +12,33 @@ logbook survives the session, the model, and the person.
 
 `docs/FORMAT.md` in the agent-logbook project is the authoritative syntax. This
 file is the working habit.
+
+## Start by reading it
+
+Before touching anything, read the logbook. Not when you sit down to write an
+entry — when you pick up the task, before the first edit. The point of the
+format is that the last session left a written handover, and a handover nobody
+reads is the same as no handover.
+
+In this order:
+
+1. `LOGBOOK.md`, the `Status:` line first. One sentence saying where the work
+   actually stands right now, which is the thing you are least likely to guess
+   correctly from the code.
+2. The `## Document index` in the same file. It tells you which long documents
+   exist and, in the status column, which ones no longer hold. Reading a design
+   note that was superseded three weeks ago is worse than reading nothing.
+3. The most recent files in `journal/`, newest first. Far enough back to cover
+   the area you are about to touch.
+
+You are reading for three things: a decision that already settled the question
+you were about to reopen, a fact that saves you from measuring something twice,
+and an assumption nobody has checked yet — the third being the most useful thing
+in the file, because it is where the next real finding usually is.
+
+If what you are about to do contradicts an entry you just read, that is not a
+reason to ignore it. It is the reason your work ends in a correction entry, and
+you should know that before you start rather than after.
 
 ## When to write an entry
 
@@ -25,13 +52,31 @@ citing later:
   limit that is real.
 - A correction of an earlier entry.
 
-Do not write one for work that produced nothing durable: a rename, a typo fix,
-a search that found nothing.
+The test is what the work produced, never what kind of work it was. Ask one
+question: did this leave behind a decision someone could disagree with, or a
+fact someone could check? If yes, write it up, however small the diff. If no,
+do not, however large the diff.
+
+The same category of work falls on both sides of that line:
+
+- Renaming a project after comparing the candidate names, checking which ones
+  collide with existing commands and packages, and rejecting the original —
+  write it up. The diff is a rename; what it produced is a decision with
+  evidence behind it, and the next person to dislike the name needs to know the
+  alternatives were already examined.
+- Renaming a variable because the old name was misspelled — do not. Nothing was
+  chosen and nothing was learned.
+- Reading through a subsystem and finding nothing wrong — do not, unless the
+  search ruled out a hypothesis someone else would otherwise spend a day on. In
+  that case what it produced is a fact: this is not where the bug is.
+
+Work that produced only a diff is already recorded, in the diff. The logbook is
+for what the diff cannot say.
 
 ## Before writing
 
-Read the recent journal files first. If the work contradicts an earlier entry,
-the new entry is a correction and must say so.
+If you skipped the reading at the top, do it now. If the work contradicts an
+earlier entry, the new entry is a correction and must say so.
 
 Get the baseline from the repository, never from memory:
 
@@ -96,6 +141,14 @@ what is true now; a reader who follows the chain also learns why the earlier
 conclusion was reasonable at the time, which is what stops the same mistake from
 being made a third time.
 
+## Keep the status line true
+
+The `Status:` line at the top of `LOGBOOK.md` is the one thing in the logbook
+that is meant to be overwritten. When your work changes where the project
+stands, rewrite that sentence. Everything else you wrote is frozen the moment it
+is committed; this line is the only place that can say what is true now, and it
+is the first thing the next session reads.
+
 ## Long documents
 
 A design note, a review, or an incident report goes in its own file and gets one
@@ -113,3 +166,20 @@ It fails on an unfilled placeholder, a baseline that does not exist, a fact with
 no source, a broken link, an unregistered document, and any edit to committed
 history. Fix what it reports before committing; do not commit a logbook that does
 not pass.
+
+Before handing the work back, check that the delivery is recorded at all:
+
+```
+logbook check --require-entry-since <the revision this work started from>
+```
+
+That fails when the journal has gained no entry since that revision — the one
+failure the five rules cannot catch, because an empty journal breaks none of
+them. If a `pre-push` hook is installed it runs this for you against whatever
+commit the remote branch is on.
+
+When it fails, the fix is to write the entry, not to get past the gate. An entry
+invented to satisfy a check is worse than no entry: it costs the next reader the
+time to read it and gives them nothing, and it teaches them that entries in this
+repository are not worth reading. If the work genuinely produced no decision and
+no citable fact, say so out loud and skip the hook deliberately.

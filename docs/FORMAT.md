@@ -16,7 +16,16 @@ journal/YYYY-MM-DD.md  entries written on that date, append-only
 ```
 
 `journal/` holds one file per calendar date. A date file may hold any number of
-entries. Entries are appended; a committed entry is never edited again.
+entries. Entries are appended; a committed entry is never edited again, with the
+single exception described under [a rewritten history](#the-one-exception-to-append-only-a-rewritten-history).
+
+The two files play opposite roles, and that is deliberate. `LOGBOOK.md` is the
+pointer layer: it says where things stand now and where the long documents are,
+and it is meant to be overwritten as that changes. `journal/` is the record
+layer, protected by R5, where nothing is ever overwritten. A reader who wants
+the current state reads the first; a reader who wants to know how the state got
+there reads the second. Anything that has to be kept current belongs in
+`LOGBOOK.md` precisely because editing it is allowed there.
 
 ## Entry syntax
 
@@ -157,9 +166,56 @@ The `Corrects:` value repeats the target entry's heading text: the date, a
 separator, and the topic. `logbook check` resolves it against the journal and
 fails when no such entry exists.
 
+## The one exception to append-only: a rewritten history
+
+R5 says committed journal text is never touched again. There is exactly one
+case where touching it is correct, and it is narrow enough to state precisely.
+
+When the repository's git history is itself rewritten — a rebase, a filter, an
+author fix that gives every commit a new id — the commit ids that old entries
+carry in `Baseline:` stop resolving. The commits they named no longer exist. An
+entry pinned to a commit that is gone is not history preserved; it is a pointer
+into nothing, and R1 will fail on it forever.
+
+In that case, and only in that case, the old `Baseline:` values may be rewritten
+to the new ids, under three conditions:
+
+1. It happens inside the same rewrite. The remap is part of the operation that
+   invalidated the ids, not a later edit that happens to fix them up.
+2. Only the baseline hashes change. No other byte of any committed entry moves:
+   not the prose, not the facts, not the sources, not the headings — including a
+   heading that has since become wrong.
+3. Each new id names the same underlying commit as the old one did. The pointer
+   is remapped, never repointed. If the rewrite dropped or squashed the commit an
+   entry was pinned to, there is no id that satisfies this, and the honest move
+   is a new entry recording that the baseline is unrecoverable.
+
+Everything else stays forbidden. A rewrite is not an opportunity to reword a
+conclusion that reads badly, and R5 does not distinguish the two: the checker
+sees only that committed bytes changed and fails. The rewrite is a deliberate
+act by a person who then has to explain it, which is the fourth condition and
+the one no tool can enforce — the rewrite gets its own entry saying what was
+rewritten and why.
+
 ## LOGBOOK.md
 
-`LOGBOOK.md` carries two sections that the checker knows about.
+`LOGBOOK.md` opens with a `Status:` line and carries two sections that the
+checker knows about.
+
+**`Status:`** is one sentence saying where the work stands right now, rewritten
+whenever that stops being true:
+
+```markdown
+# Logbook
+
+Status: The retry budget is in and measured; the cache migration has not started.
+```
+
+No rule inspects it, and it is the one line in the whole format that is meant to
+be overwritten rather than appended to. That is why it lives here and not in a
+journal entry: a journal entry is true about the moment it was written and stays
+that way forever, so it can never answer "where are we now". A reader arriving
+cold reads this line first and the journal second.
 
 **`## Document index`** registers every long document that lives outside the
 journal, so that a reader who has never seen the repository can find it and know
@@ -217,6 +273,38 @@ they report themselves as skipped rather than passing silently.
 
 Violations exit non-zero. Warnings — a heading that is not an entry, an
 unrecognised field name — do not.
+
+## The delivery gate
+
+Every rule above judges an entry that exists. An empty journal breaks none of
+them, so `logbook check` on a repository whose assistant wrote nothing all day
+passes. The gate that closes this is not a rule, because it cannot run without
+being told what the delivery is:
+
+```
+logbook check --require-entry-since <git-ref>
+```
+
+The check then also fails unless the journal holds at least one complete entry
+that was not already complete at `<git-ref>`.
+
+**Complete** means the entry declares a `Baseline:` that is a hash rather than
+the template placeholder, and has at least one item under `Decision:` or
+`Facts:` that is more than placeholder text. Whether that hash resolves and
+whether those facts carry sources stays R1's and R4's job; completeness here
+only decides whether the entry is a record or an untouched skeleton, so that
+running `logbook add` cannot by itself satisfy the gate.
+
+**Not already complete at `<git-ref>`** is decided by the entry's identity,
+which is its date and its topic. The comparison reads the journal directory as
+it was committed at that revision and compares it with the working copy, so an
+entry written for this delivery counts whether or not it has been committed yet.
+
+The revision must resolve to a commit in this clone. One that does not is an
+error rather than a pass, so that a misspelled branch name cannot switch the gate
+off without saying so. Where there is genuinely nothing to compare against — the
+first push of a branch the remote has never seen — the caller leaves the option
+off; `hooks/pre-push` does exactly that, and prints why.
 
 ## What the format deliberately leaves out
 

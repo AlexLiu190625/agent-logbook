@@ -92,6 +92,40 @@ $ logbook check
 logbook check passed: 1 entry in 1 journal file.
 ```
 
+## The check that something was written at all
+
+The five rules judge entries that exist. None of them can catch the failure
+that actually happens: an assistant finishes a day of work, writes no entry,
+and `logbook check` passes on an empty journal because nothing in it is wrong.
+
+`--require-entry-since` closes that. Give it the revision the delivery started
+from — the commit the remote branch is on, the base of the pull request — and
+the check also fails when the journal has gained nothing since:
+
+```
+$ logbook check --require-entry-since delivery-base
+This delivery is not recorded in the logbook: no entry has been added since delivery-base (6c06e7e).
+    Write one before shipping: `logbook add "what you just did"`, then fill in Baseline:,
+    Decision: and Facts: and commit the journal file alongside the change.
+    If this change genuinely produced no decision and no fact worth citing, skip the gate
+    deliberately (git push --no-verify) rather than writing an empty entry to get past it.
+
+logbook check failed: this delivery has no new logbook entry since delivery-base (6c06e7e).
+```
+
+An entry counts when it is pinned to a `Baseline:` and says something under
+`Decision:` or `Facts:`. An untouched `logbook add` skeleton does not count,
+which stops the gate from being satisfied by running one command.
+
+When it is satisfied, it says which revision it compared against:
+
+```
+$ logbook check --require-entry-since 6c06e7e
+note: require-entry-since 6c06e7e: 1 new entry in the journal.
+
+logbook check passed: 2 entries in 1 journal file.
+```
+
 ## Install
 
 ```
@@ -114,6 +148,7 @@ the `git` command for the two rules that need history.
 | `logbook init` | Creates `LOGBOOK.md` and `journal/` in the current directory, refusing to overwrite either if it already exists. |
 | `logbook add [title]` | Appends a blank entry to today's journal file, dated from the system clock, creating the file if needed. |
 | `logbook check` | Runs the five rules and exits non-zero on any violation, printing each one with its file, line, and what to do about it. |
+| `logbook check --require-entry-since <git-ref>` | The same, and also fails when the journal has gained no entry since `<git-ref>`. |
 
 ## Rules
 
@@ -130,6 +165,10 @@ is reported as skipped rather than checked, since the checker has no copy of tha
 repository. Outside a git repository R1 and R5 announce that they were skipped,
 rather than passing silently and letting a green result mean nothing.
 
+`--require-entry-since` is deliberately not one of the five. The rules run
+everywhere and need no argument; the delivery gate needs to be told what the
+delivery is, so it only runs when a caller names a revision.
+
 ## Wiring it in
 
 Run the checker on every commit:
@@ -139,9 +178,32 @@ cp node_modules/agent-logbook/hooks/pre-commit .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 ```
 
+Refuse to push work that was never written up:
+
+```
+cp node_modules/agent-logbook/hooks/pre-push .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
+```
+
+git tells the pre-push hook which commit each remote branch is on, and the hook
+passes that commit to `--require-entry-since`. So the comparison is against what
+the remote already has, not against your last commit. Pushing a branch the
+remote has never seen has nothing to compare against; the hook says so and lets
+the push through rather than blocking a first push or passing in silence:
+
+```
+$ git push -u origin main
+logbook: refs/heads/main does not exist on the remote yet, so there is no revision to compare
+logbook: against. The new-entry check is skipped for this first push; the rules still run.
+logbook check passed: 2 entries in 1 journal file.
+```
+
 Run it in CI with `.github/workflows/logbook-check.yml` from this repository.
 The checkout needs `fetch-depth: 0`, because R5 compares each journal file
-against its committed version and cannot do that against a shallow clone.
+against its committed version and cannot do that against a shallow clone. On a
+pull request, adding `--require-entry-since origin/${{ github.base_ref }}` makes
+CI enforce the same thing the pre-push hook does, for anyone who pushed with
+`--no-verify`.
 
 To teach an assistant the habit, copy `skills/logbook/SKILL.md` into the skills
 directory of Claude Code, Codex, or whatever else writes in your repository. It
@@ -161,6 +223,18 @@ is written as a new entry rather than an edit.
 A directory that does not exist is not an error — R3 reports that it had nothing
 to check. A `.logbookrc.json` that is not valid JSON is an error, so that a typo
 cannot silently switch the rule off.
+
+## Scope
+
+One repository, one logbook. `logbook check` finds the nearest `LOGBOOK.md` at
+or above the working directory and treats that as the whole world.
+
+Several lines of work going on in the same repository at the same time therefore
+share one journal, and their entries interleave by date rather than sitting in
+separate streams. Reading back what happened on one of them means reading past
+the others. This is a real limitation, not a feature: the format has no notion
+of a work stream, and no plan to grow one until a repository with that problem
+says what it actually needs.
 
 ## The format
 

@@ -7,10 +7,18 @@ entirely — and ask why the cache is a single SQLite file. Nobody knows. The
 comparison happened, the reasoning was sound, and it now exists only inside a
 conversation that has been closed.
 
-agent-logbook is a file format for writing that down, and a checker that stops
-the file from rotting. The state that matters between sessions — decisions,
-verified facts, guesses, corrections — lives in plain markdown in the
-repository, next to the code it explains, in the same commit and the same diff.
+A logbook, on a ship or in a cockpit, is the formal record kept as the voyage
+happens: written in order, and never amended afterwards. It exists for the
+handover. Whoever comes on watch next reads it and picks up where the last watch
+left off, without having been there.
+
+agent-logbook does that for AI sessions. The next watch is the next session,
+often a different model, and it should inherit a written record rather than
+start from nothing. So this is a file format for writing that record down, and a
+checker that stops the file from rotting. The state that matters between
+sessions — decisions, verified facts, guesses, corrections — lives in plain
+markdown in the repository, next to the code it explains, in the same commit and
+the same diff.
 
 There is no server, no database, and no retrieval index. There is a directory of
 markdown files and a script that refuses to let them lie.
@@ -60,8 +68,8 @@ logbook check failed: 1 problem (R4:1) across 1 entry.
 ```
 
 That line was not wrong, exactly. It was a guess wearing the clothes of a fact,
-which is the failure that makes a logbook worse than no logbook at all. Moving it
-under `Assumptions:` is a valid fix, and an honest one.
+which is the failure that makes a logbook worse than no logbook at all. Moving
+it under `Assumptions:` is a valid fix, and an honest one.
 
 Installed as a pre-commit hook, the same check refuses to let already-committed
 history be quietly reworded:

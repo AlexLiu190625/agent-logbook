@@ -23,6 +23,14 @@ jobs:
       - name: Check the logbook
         run: node bin/logbook.js check
 
+      # On a pull request, also require that the branch wrote something down.
+      # This is the same gate hooks/pre-push applies, repeated here for anyone
+      # who pushed with --no-verify. It needs the fetch-depth: 0 above, so that
+      # origin/<base branch> is a revision this clone actually has.
+      - name: Check that this delivery is recorded
+        if: github.event_name == 'pull_request'
+        run: node bin/logbook.js check --require-entry-since "origin/${{ github.base_ref }}"
+
   test:
     runs-on: ubuntu-latest
     steps:

@@ -1,0 +1,79 @@
+#!/bin/sh
+#
+# agent-logbook pre-push hook.
+#
+# Install:
+#   cp hooks/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+#
+# The pre-commit hook checks that what is written is written correctly. This one
+# checks the other thing: that the work being pushed was written down at all. It
+# runs `logbook check --require-entry-since <the commit the remote is on>`, so a
+# branch that adds code and adds no journal entry does not reach the remote.
+#
+# git feeds this hook one line per ref being pushed:
+#
+#   <local ref> <local sha> <remote ref> <remote sha>
+#
+# <remote sha> is forty zeros when the remote does not have that branch yet. A
+# first push therefore has no revision to compare against, and is let through
+# with a message saying so rather than being blocked or silently passed.
+
+if [ -x "./node_modules/.bin/logbook" ]; then
+  LOGBOOK="./node_modules/.bin/logbook"
+elif command -v logbook >/dev/null 2>&1; then
+  LOGBOOK="logbook"
+else
+  # Fail closed, but say what is actually wrong: a missing checker is not the
+  # same thing as a logbook that failed its rules.
+  echo "Push stopped: agent-logbook is not installed, so the logbook cannot be checked."
+  echo "Install it with 'npm install --save-dev agent-logbook', or delete .git/hooks/pre-push."
+  exit 1
+fi
+
+# `case` on "does this string contain a character other than 0" is the portable
+# way to recognise git's all-zeros sha without depending on its exact length.
+is_zero_sha() {
+  case "$1" in
+    "" | *[!0]*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+status=0
+pushed=0
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if is_zero_sha "$local_sha"; then
+    # Deleting a branch on the remote. Nothing is being delivered.
+    continue
+  fi
+  pushed=1
+
+  if is_zero_sha "$remote_sha"; then
+    echo "logbook: $remote_ref does not exist on the remote yet, so there is no revision to compare"
+    echo "logbook: against. The new-entry check is skipped for this first push; the rules still run."
+    $LOGBOOK check || status=1
+    continue
+  fi
+
+  if ! git cat-file -e "$remote_sha^{commit}" 2>/dev/null; then
+    echo "logbook: the remote is at $remote_sha, which is not in this clone. Run 'git fetch' to make"
+    echo "logbook: the comparison possible. The new-entry check is skipped; the rules still run."
+    $LOGBOOK check || status=1
+    continue
+  fi
+
+  $LOGBOOK check --require-entry-since "$remote_sha" || status=1
+done
+
+if [ "$pushed" -eq 0 ]; then
+  exit 0
+fi
+
+if [ "$status" -ne 0 ]; then
+  echo
+  echo "Push stopped: the logbook does not cover what is being pushed."
+  echo "Fix the problems above, or push with --no-verify if you know why you are skipping this."
+fi
+
+exit $status

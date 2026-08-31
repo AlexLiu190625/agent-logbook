@@ -103,9 +103,49 @@ function setupLogbook(dir, { hash, entry, indexRows, date = '2026-08-31' } = {})
   write(dir, `journal/${date}.md`, `# Journal ${date}\n\n${body}`);
 }
 
+// Puts a `logbook` executable where the sample hooks look for one, so a hook
+// test drives the real CLI instead of a stand-in.
+function installBinShim(dir) {
+  const binDir = path.join(dir, 'node_modules', '.bin');
+  fs.mkdirSync(binDir, { recursive: true });
+  const shim = path.join(binDir, 'logbook');
+  fs.writeFileSync(shim, `#!/bin/sh\nexec "${process.execPath}" "${BIN}" "$@"\n`);
+  fs.chmodSync(shim, 0o755);
+  return shim;
+}
+
+function installHook(dir, name) {
+  const target = path.join(dir, '.git', 'hooks', name);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.copyFileSync(path.join(__dirname, '..', 'hooks', name), target);
+  fs.chmodSync(target, 0o755);
+  return target;
+}
+
+// Runs a hook the way git does: as a program, with the ref lines on stdin.
+function runHook(dir, name, stdin = '') {
+  const r = spawnSync(path.join(dir, '.git', 'hooks', name), [], {
+    cwd: dir,
+    encoding: 'utf8',
+    input: stdin,
+  });
+  return {
+    status: r.status,
+    stdout: r.stdout,
+    stderr: r.stderr,
+    output: `${r.stdout}${r.stderr}`,
+  };
+}
+
+const ZERO_SHA = '0000000000000000000000000000000000000000';
+
 module.exports = {
   BIN,
+  ZERO_SHA,
   git,
+  installBinShim,
+  installHook,
+  runHook,
   makeRepo,
   headHash,
   run,

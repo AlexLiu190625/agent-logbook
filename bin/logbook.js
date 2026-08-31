@@ -15,14 +15,49 @@ Usage:
   logbook check          Check the logbook against the five rules.
 
 Options:
+  --require-entry-since <git-ref>
+                         With \`check\`: also fail when the journal has gained no
+                         new entry since <git-ref>. This is the gate that stops
+                         a delivery from shipping unrecorded; the five rules
+                         only judge entries that were actually written.
   -h, --help             Show this message.
   -v, --version          Show the version.
 
 Exit codes:
   0  everything passed
-  1  rule violations, or the command could not run
+  1  rule violations, a delivery with no entry, or the command could not run
   2  wrong usage
 `;
+
+const REQUIRE_ENTRY = '--require-entry-since';
+
+// Returns { options, error } so that a malformed invocation is a usage error
+// rather than a silently ignored flag.
+function parseCheckArgs(args) {
+  const options = { requireEntrySince: null };
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === REQUIRE_ENTRY) {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith('-')) {
+        return { error: `${REQUIRE_ENTRY} needs a git revision, for example \`${REQUIRE_ENTRY} origin/main\`.` };
+      }
+      options.requireEntrySince = value;
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith(`${REQUIRE_ENTRY}=`)) {
+      const value = arg.slice(REQUIRE_ENTRY.length + 1);
+      if (!value) {
+        return { error: `${REQUIRE_ENTRY} needs a git revision, for example \`${REQUIRE_ENTRY}=origin/main\`.` };
+      }
+      options.requireEntrySince = value;
+      continue;
+    }
+    return { error: `Unknown option for \`logbook check\`: ${arg}` };
+  }
+  return { options };
+}
 
 function main(argv, out, cwd) {
   const args = argv.slice();
@@ -39,6 +74,12 @@ function main(argv, out, cwd) {
   if (command === 'init') return commands.init(cwd, out);
   if (command === 'add') return commands.add(cwd, args.join(' '), out);
   if (command === 'check') {
+    const parsed = parseCheckArgs(args);
+    if (parsed.error) {
+      out.err(parsed.error);
+      out.err(USAGE.trimEnd());
+      return 2;
+    }
     const root = ws.findRoot(cwd);
     if (!root) {
       out.err(`No ${ws.LOGBOOK_FILE} found here or in any parent directory. Run \`logbook init\` first.`);
@@ -46,7 +87,7 @@ function main(argv, out, cwd) {
     }
     let result;
     try {
-      result = checker.check(root);
+      result = checker.check(root, parsed.options);
     } catch (err) {
       if (err.userFacing) {
         out.err(err.message);
@@ -55,9 +96,10 @@ function main(argv, out, cwd) {
       throw err;
     }
     const text = checker.format(result);
-    if (result.violations.length) out.err(text);
+    const failed = checker.failed(result);
+    if (failed) out.err(text);
     else out.log(text);
-    return result.violations.length ? 1 : 0;
+    return failed ? 1 : 0;
   }
 
   out.err(`Unknown command: ${command}`);

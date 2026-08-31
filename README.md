@@ -102,15 +102,18 @@ and `logbook check` passes on an empty journal because nothing in it is wrong.
 from — the commit the remote branch is on, the base of the pull request — and
 the check also fails when the journal has gained nothing since:
 
+Both transcripts below are from this repository's own history — the same
+delivery, checked before and after its journal entry was written:
+
 ```
-$ logbook check --require-entry-since delivery-base
-This delivery is not recorded in the logbook: no entry has been added since delivery-base (6c06e7e).
+$ logbook check --require-entry-since 61e6f51
+This delivery is not recorded in the logbook: no entry has been added since 61e6f51.
     Write one before shipping: `logbook add "what you just did"`, then fill in Baseline:,
     Decision: and Facts: and commit the journal file alongside the change.
     If this change genuinely produced no decision and no fact worth citing, skip the gate
     deliberately (git push --no-verify) rather than writing an empty entry to get past it.
 
-logbook check failed: this delivery has no new logbook entry since delivery-base (6c06e7e).
+logbook check failed: this delivery has no new logbook entry since 61e6f51.
 ```
 
 An entry counts when it is pinned to a `Baseline:` and says something under
@@ -120,10 +123,10 @@ which stops the gate from being satisfied by running one command.
 When it is satisfied, it says which revision it compared against:
 
 ```
-$ logbook check --require-entry-since 6c06e7e
-note: require-entry-since 6c06e7e: 1 new entry in the journal.
+$ logbook check --require-entry-since 61e6f51
+note: require-entry-since 61e6f51: 1 new entry in the journal.
 
-logbook check passed: 2 entries in 1 journal file.
+logbook check passed: 7 entries in 1 journal file.
 ```
 
 ## Install

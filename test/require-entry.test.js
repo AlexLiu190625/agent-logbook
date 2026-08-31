@@ -125,7 +125,7 @@ test('check rejects an unknown option instead of ignoring it', () => {
 
 test('--require-entry-since says so when there is no git repository', () => {
   const dir = h.makeRepo({ initGit: false });
-  h.setupLogbook(dir, { hash: '0123456789abcdef0123456789abcdef01234567' });
+  h.setupLogbook(dir, { hash: '0123456789012345678901234567890123456789' });
   const r = h.run(dir, ['check', '--require-entry-since', 'HEAD']);
   assert.strictEqual(r.status, 1, r.output);
   assert.match(r.output, /needs a git repository/);
@@ -181,7 +181,7 @@ test('pre-push skips the gate when the remote commit is not in this clone', () =
   h.installHook(dir, 'pre-push');
 
   const local = h.git(dir, ['rev-parse', 'HEAD']).trim();
-  const absent = '0123456789abcdef0123456789abcdef01234567';
+  const absent = '0123456789012345678901234567890123456789';
   const r = h.runHook(dir, 'pre-push', `refs/heads/main ${local} refs/heads/main ${absent}\n`);
   assert.strictEqual(r.status, 0, r.output);
   assert.match(r.output, /which is not in this clone/);

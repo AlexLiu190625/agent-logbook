@@ -21,10 +21,10 @@ test('R1 passes when the baseline is a commit in this repository', () => {
 
 test('R1 fails when the baseline commit does not exist', () => {
   const dir = h.makeRepo();
-  h.setupLogbook(dir, { hash: '0123456789abcdef0123456789abcdef01234567' });
+  h.setupLogbook(dir, { hash: '0123456789012345678901234567890123456789' });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 1, r.output);
-  assert.match(r.output, /R1 Baseline commit 0123456789abcdef.* does not exist in this repository/);
+  assert.match(r.output, /R1 Baseline commit 0123456789.* does not exist in this repository/);
   assert.match(r.output, /journal\/2026-08-31\.md:5/);
 });
 
@@ -44,7 +44,7 @@ Facts:
 
 test('R1 skips a baseline that names another repository', () => {
   const dir = h.makeRepo();
-  h.setupLogbook(dir, { hash: 'other-repo@0123456789abcdef0123456789abcdef01234567' });
+  h.setupLogbook(dir, { hash: 'other-repo@0123456789012345678901234567890123456789' });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 0, r.output);
   assert.match(r.output, /lives in another repository, existence not checked/);
@@ -52,7 +52,7 @@ test('R1 skips a baseline that names another repository', () => {
 
 test('R1 and R5 report themselves skipped outside a git repository', () => {
   const dir = h.makeRepo({ initGit: false });
-  h.setupLogbook(dir, { hash: '0123456789abcdef0123456789abcdef01234567' });
+  h.setupLogbook(dir, { hash: '0123456789012345678901234567890123456789' });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 0, r.output);
   assert.match(r.output, /R1 skipped: this directory is not inside a git repository/);
@@ -360,7 +360,7 @@ test('check reports every violation at once with a per-rule count', () => {
     indexRows: ['| [reviews/gone.md](reviews/gone.md) | vanished | stale |'],
     entry: `## 2026-08-31 — Broken in several ways
 
-Baseline: 0123456789abcdef0123456789abcdef01234567
+Baseline: 0123456789012345678901234567890123456789
 
 Facts:
 - A claim with no source

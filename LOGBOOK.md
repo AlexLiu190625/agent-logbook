@@ -28,3 +28,6 @@ One line per meaningful change to this file.
   `LEDGER.md` and the command was `ledger`. See the correction entry in
   [journal/2026-08-31.md](journal/2026-08-31.md).
 - 2026-08-31 Published to GitHub; npm publication still pending.
+- 2026-08-31 Commit authorship rewritten and force-pushed after a wrong
+  repo-local git identity; baselines in earlier entries remapped in the same
+  rewrite.

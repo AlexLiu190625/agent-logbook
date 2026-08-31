@@ -27,3 +27,4 @@ One line per meaningful change to this file.
 - 2026-08-31 Renamed from agent-ledger to agent-logbook; this file was
   `LEDGER.md` and the command was `ledger`. See the correction entry in
   [journal/2026-08-31.md](journal/2026-08-31.md).
+- 2026-08-31 Published to GitHub; npm publication still pending.

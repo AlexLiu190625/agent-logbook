@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# agent-ledger pre-commit hook.
+#
+# Install:
+#   cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+#
+# The hook runs `ledger check` against the working tree. Because R5 compares
+# journal files with their committed versions, it catches a rewrite of history
+# before that rewrite becomes a commit.
+
+set -e
+
+if command -v ledger >/dev/null 2>&1; then
+  LEDGER="ledger"
+elif [ -x "./node_modules/.bin/ledger" ]; then
+  LEDGER="./node_modules/.bin/ledger"
+else
+  LEDGER="npx --no-install agent-ledger"
+fi
+
+if ! $LEDGER check; then
+  echo
+  echo "Commit stopped: the ledger does not pass its own rules."
+  echo "Fix the problems above, or commit with --no-verify if you know why you are skipping this."
+  exit 1
+fi

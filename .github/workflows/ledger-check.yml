@@ -1,0 +1,33 @@
+name: ledger check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # R5 compares each journal file with its committed version, so the
+          # checkout needs real history rather than a single squashed commit.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # This repository keeps its own ledger, so it runs the checker it ships.
+      # In your repository the step is:  npx --yes agent-ledger check
+      - name: Check the ledger
+        run: node bin/ledger.js check
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm test

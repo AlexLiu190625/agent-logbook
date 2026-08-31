@@ -1,16 +1,16 @@
 ---
-name: ledger
-description: Record work in the repository's markdown ledger. Use after finishing a piece of work that produced a decision or a verified fact — a choice between options, a root cause, a benchmark result, a discovered constraint — and whenever an earlier ledger entry turns out to be wrong. Also use when asked what was decided before, or why the code is the way it is.
+name: logbook
+description: Record work in the repository's markdown logbook. Use after finishing a piece of work that produced a decision or a verified fact — a choice between options, a root cause, a benchmark result, a discovered constraint — and whenever an earlier logbook entry turns out to be wrong. Also use when asked what was decided before, or why the code is the way it is.
 ---
 
-# Ledger
+# Logbook
 
-The repository keeps a work ledger: `LEDGER.md` plus append-only daily files
+The repository keeps a work logbook: `LOGBOOK.md` plus append-only daily files
 under `journal/`. It exists because sessions are disposable and repositories are
 not. A decision that lives only in a closed session is lost; a decision in the
-ledger survives the session, the model, and the person.
+logbook survives the session, the model, and the person.
 
-`docs/FORMAT.md` in the agent-ledger project is the authoritative syntax. This
+`docs/FORMAT.md` in the agent-logbook project is the authoritative syntax. This
 file is the working habit.
 
 ## When to write an entry
@@ -62,7 +62,7 @@ Next:
 - Measure the real write rate before the next release.
 ```
 
-`ledger add "topic"` appends this skeleton to today's file with the date already
+`logbook add "topic"` appends this skeleton to today's file with the date already
 filled in.
 
 ## The two rules that matter most
@@ -99,17 +99,17 @@ being made a third time.
 ## Long documents
 
 A design note, a review, or an incident report goes in its own file and gets one
-row in the `## Document index` table of `LEDGER.md`: the path, a one-line
+row in the `## Document index` table of `LOGBOOK.md`: the path, a one-line
 conclusion, and a status. An unregistered document under a registered directory
 fails the check, because a document nobody can find is a document nobody reads.
 
 ## Finish by checking
 
 ```
-ledger check
+logbook check
 ```
 
 It fails on an unfilled placeholder, a baseline that does not exist, a fact with
 no source, a broken link, an unregistered document, and any edit to committed
-history. Fix what it reports before committing; do not commit a ledger that does
+history. Fix what it reports before committing; do not commit a logbook that does
 not pass.

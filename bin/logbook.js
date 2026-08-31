@@ -7,12 +7,12 @@ const checker = require('../lib/check');
 const ws = require('../lib/workspace');
 const pkg = require('../package.json');
 
-const USAGE = `ledger - a plain-markdown work ledger for AI coding sessions
+const USAGE = `logbook - a plain-markdown work logbook for AI coding sessions
 
 Usage:
-  ledger init            Create LEDGER.md and journal/ in the current directory.
-  ledger add [title]     Append a blank entry to today's journal file.
-  ledger check           Check the ledger against the five rules.
+  logbook init           Create LOGBOOK.md and journal/ in the current directory.
+  logbook add [title]    Append a blank entry to today's journal file.
+  logbook check          Check the logbook against the five rules.
 
 Options:
   -h, --help             Show this message.
@@ -41,7 +41,7 @@ function main(argv, out, cwd) {
   if (command === 'check') {
     const root = ws.findRoot(cwd);
     if (!root) {
-      out.err(`No ${ws.LEDGER_FILE} found here or in any parent directory. Run \`ledger init\` first.`);
+      out.err(`No ${ws.LOGBOOK_FILE} found here or in any parent directory. Run \`logbook init\` first.`);
       return 1;
     }
     let result;

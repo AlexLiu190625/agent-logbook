@@ -13,7 +13,7 @@ const REVIEW_ROW =
 
 test('R1 passes when the baseline is a commit in this repository', () => {
   const dir = h.makeRepo();
-  h.setupLedger(dir, { hash: h.headHash(dir) });
+  h.setupLogbook(dir, { hash: h.headHash(dir) });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 0, r.output);
   assert.match(r.output, /passed/);
@@ -21,7 +21,7 @@ test('R1 passes when the baseline is a commit in this repository', () => {
 
 test('R1 fails when the baseline commit does not exist', () => {
   const dir = h.makeRepo();
-  h.setupLedger(dir, { hash: '0123456789abcdef0123456789abcdef01234567' });
+  h.setupLogbook(dir, { hash: '0123456789abcdef0123456789abcdef01234567' });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 1, r.output);
   assert.match(r.output, /R1 Baseline commit 0123456789abcdef.* does not exist in this repository/);
@@ -30,7 +30,7 @@ test('R1 fails when the baseline commit does not exist', () => {
 
 test('R1 fails when an entry declares no baseline at all', () => {
   const dir = h.makeRepo();
-  h.setupLedger(dir, {
+  h.setupLogbook(dir, {
     entry: `## 2026-08-31 — No baseline here
 
 Facts:
@@ -44,7 +44,7 @@ Facts:
 
 test('R1 skips a baseline that names another repository', () => {
   const dir = h.makeRepo();
-  h.setupLedger(dir, { hash: 'other-repo@0123456789abcdef0123456789abcdef01234567' });
+  h.setupLogbook(dir, { hash: 'other-repo@0123456789abcdef0123456789abcdef01234567' });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 0, r.output);
   assert.match(r.output, /lives in another repository, existence not checked/);
@@ -52,7 +52,7 @@ test('R1 skips a baseline that names another repository', () => {
 
 test('R1 and R5 report themselves skipped outside a git repository', () => {
   const dir = h.makeRepo({ initGit: false });
-  h.setupLedger(dir, { hash: '0123456789abcdef0123456789abcdef01234567' });
+  h.setupLogbook(dir, { hash: '0123456789abcdef0123456789abcdef01234567' });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 0, r.output);
   assert.match(r.output, /R1 skipped: this directory is not inside a git repository/);
@@ -64,27 +64,27 @@ test('R1 and R5 report themselves skipped outside a git repository', () => {
 test('R2 passes when a link points at a file that exists', () => {
   const dir = h.makeRepo();
   h.write(dir, 'reviews/storage.md', '# Storage options\n');
-  h.setupLedger(dir, { hash: h.headHash(dir), indexRows: [REVIEW_ROW] });
+  h.setupLogbook(dir, { hash: h.headHash(dir), indexRows: [REVIEW_ROW] });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 0, r.output);
 });
 
 test('R2 fails on a link to a file that does not exist', () => {
   const dir = h.makeRepo();
-  h.setupLedger(dir, {
+  h.setupLogbook(dir, {
     hash: h.headHash(dir),
     indexRows: ['| [reviews/gone.md](reviews/gone.md) | vanished | stale |'],
   });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 1, r.output);
   assert.match(r.output, /R2 Link points at reviews\/gone\.md, which does not exist/);
-  assert.match(r.output, /^LEDGER\.md:7/m);
+  assert.match(r.output, /^LOGBOOK\.md:7/m);
 });
 
 test('R2 explains that links resolve next to the file that holds them', () => {
   const dir = h.makeRepo();
   h.write(dir, 'reviews/storage.md', '# Storage options\n');
-  h.setupLedger(dir, {
+  h.setupLogbook(dir, {
     hash: h.headHash(dir),
     indexRows: [REVIEW_ROW],
     entry: `## 2026-08-31 — Chose SQLite
@@ -103,7 +103,7 @@ Facts:
 test('R2 leaves external links alone', () => {
   const dir = h.makeRepo();
   const hash = h.headHash(dir);
-  h.setupLedger(dir, {
+  h.setupLogbook(dir, {
     hash,
     entry: `## 2026-08-31 — Read the upstream issue
 
@@ -120,7 +120,7 @@ Facts:
 test('R2 passes when a correction names an entry that exists', () => {
   const dir = h.makeRepo();
   const hash = h.headHash(dir);
-  h.setupLedger(dir, { hash });
+  h.setupLogbook(dir, { hash });
   h.write(
     dir,
     'journal/2026-09-02.md',
@@ -143,7 +143,7 @@ Facts:
 test('R2 fails when a correction names an entry that does not exist', () => {
   const dir = h.makeRepo();
   const hash = h.headHash(dir);
-  h.setupLedger(dir, { hash });
+  h.setupLogbook(dir, { hash });
   h.write(
     dir,
     'journal/2026-09-02.md',
@@ -169,7 +169,7 @@ Facts:
 test('R3 passes when every document in reviews/ is in the index', () => {
   const dir = h.makeRepo();
   h.write(dir, 'reviews/storage.md', '# Storage options\n');
-  h.setupLedger(dir, { hash: h.headHash(dir), indexRows: [REVIEW_ROW] });
+  h.setupLogbook(dir, { hash: h.headHash(dir), indexRows: [REVIEW_ROW] });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 0, r.output);
 });
@@ -178,7 +178,7 @@ test('R3 fails on a document that is not in the index', () => {
   const dir = h.makeRepo();
   h.write(dir, 'reviews/storage.md', '# Storage options\n');
   h.write(dir, 'reviews/2026-09-01-retry-policy.md', '# Retry policy\n');
-  h.setupLedger(dir, { hash: h.headHash(dir), indexRows: [REVIEW_ROW] });
+  h.setupLogbook(dir, { hash: h.headHash(dir), indexRows: [REVIEW_ROW] });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 1, r.output);
   assert.match(r.output, /R3 reviews\/2026-09-01-retry-policy\.md is not registered in the document index/);
@@ -187,18 +187,18 @@ test('R3 fails on a document that is not in the index', () => {
 
 test('R3 is silent when the registered directory does not exist', () => {
   const dir = h.makeRepo();
-  h.setupLedger(dir, { hash: h.headHash(dir) });
+  h.setupLogbook(dir, { hash: h.headHash(dir) });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 0, r.output);
   assert.match(r.output, /none of the registered directories exist/);
 });
 
-test('R3 honours registeredDirs from .ledgerrc.json', () => {
+test('R3 honours registeredDirs from .logbookrc.json', () => {
   const dir = h.makeRepo();
-  h.write(dir, '.ledgerrc.json', JSON.stringify({ registeredDirs: ['notes'] }, null, 2));
+  h.write(dir, '.logbookrc.json', JSON.stringify({ registeredDirs: ['notes'] }, null, 2));
   h.write(dir, 'reviews/unregistered.md', '# not watched\n');
   h.write(dir, 'notes/design.md', '# watched\n');
-  h.setupLedger(dir, { hash: h.headHash(dir) });
+  h.setupLogbook(dir, { hash: h.headHash(dir) });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 1, r.output);
   assert.match(r.output, /notes\/design\.md is not registered/);
@@ -210,7 +210,7 @@ test('R3 honours registeredDirs from .ledgerrc.json', () => {
 test('R4 passes when every fact carries a source', () => {
   const dir = h.makeRepo();
   const hash = h.headHash(dir);
-  h.setupLedger(dir, {
+  h.setupLogbook(dir, {
     hash,
     entry: `## 2026-08-31 — Three sourced facts
 
@@ -229,7 +229,7 @@ Facts:
 test('R4 fails on a fact with no source', () => {
   const dir = h.makeRepo();
   const hash = h.headHash(dir);
-  h.setupLedger(dir, {
+  h.setupLogbook(dir, {
     hash,
     entry: `## 2026-08-31 — One sourced fact and one bare claim
 
@@ -250,7 +250,7 @@ Facts:
 test('R4 ignores unsourced lines under Assumptions', () => {
   const dir = h.makeRepo();
   const hash = h.headHash(dir);
-  h.setupLedger(dir, {
+  h.setupLogbook(dir, {
     hash,
     entry: `## 2026-08-31 — Facts and guesses kept apart
 
@@ -271,7 +271,7 @@ Assumptions:
 test('R4 accepts a source placed after a pasted command transcript', () => {
   const dir = h.makeRepo();
   const hash = h.headHash(dir);
-  h.setupLedger(dir, {
+  h.setupLogbook(dir, {
     hash,
     entry: `## 2026-08-31 — Fact with a transcript
 
@@ -298,9 +298,9 @@ Facts:
 test('R5 passes when a committed journal only grows', () => {
   const dir = h.makeRepo();
   const hash = h.headHash(dir);
-  h.setupLedger(dir, { hash });
+  h.setupLogbook(dir, { hash });
   h.git(dir, ['add', '-A']);
-  h.git(dir, ['commit', '-q', '-m', 'ledger']);
+  h.git(dir, ['commit', '-q', '-m', 'logbook']);
 
   const file = path.join(dir, 'journal', '2026-08-31.md');
   fs.appendFileSync(
@@ -314,9 +314,9 @@ test('R5 passes when a committed journal only grows', () => {
 test('R5 fails when committed journal history is rewritten', () => {
   const dir = h.makeRepo();
   const hash = h.headHash(dir);
-  h.setupLedger(dir, { hash });
+  h.setupLogbook(dir, { hash });
   h.git(dir, ['add', '-A']);
-  h.git(dir, ['commit', '-q', '-m', 'ledger']);
+  h.git(dir, ['commit', '-q', '-m', 'logbook']);
 
   const file = path.join(dir, 'journal', '2026-08-31.md');
   const rewritten = fs
@@ -333,9 +333,9 @@ test('R5 fails when committed journal history is rewritten', () => {
 test('R5 fails when a committed entry is deleted', () => {
   const dir = h.makeRepo();
   const hash = h.headHash(dir);
-  h.setupLedger(dir, { hash });
+  h.setupLogbook(dir, { hash });
   h.git(dir, ['add', '-A']);
-  h.git(dir, ['commit', '-q', '-m', 'ledger']);
+  h.git(dir, ['commit', '-q', '-m', 'logbook']);
 
   const file = path.join(dir, 'journal', '2026-08-31.md');
   fs.writeFileSync(file, '# Journal 2026-08-31\n');
@@ -346,7 +346,7 @@ test('R5 fails when a committed entry is deleted', () => {
 
 test('R5 passes for a journal file that is not committed yet', () => {
   const dir = h.makeRepo();
-  h.setupLedger(dir, { hash: h.headHash(dir) });
+  h.setupLogbook(dir, { hash: h.headHash(dir) });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 0, r.output);
 });
@@ -356,7 +356,7 @@ test('R5 passes for a journal file that is not committed yet', () => {
 test('check reports every violation at once with a per-rule count', () => {
   const dir = h.makeRepo();
   h.write(dir, 'reviews/storage.md', '# Storage options\n');
-  h.setupLedger(dir, {
+  h.setupLogbook(dir, {
     indexRows: ['| [reviews/gone.md](reviews/gone.md) | vanished | stale |'],
     entry: `## 2026-08-31 — Broken in several ways
 
@@ -372,23 +372,23 @@ Facts:
   assert.match(r.output, /R2:1/);
   assert.match(r.output, /R3:1/);
   assert.match(r.output, /R4:1/);
-  assert.match(r.output, /ledger check failed: 4 problems/);
+  assert.match(r.output, /logbook check failed: 4 problems/);
 });
 
 test('check warns about a heading that is not an entry', () => {
   const dir = h.makeRepo();
   const hash = h.headHash(dir);
-  h.setupLedger(dir, { hash, entry: `${h.goodEntry(hash)}\n## Scratch notes\n\nnot an entry\n` });
+  h.setupLogbook(dir, { hash, entry: `${h.goodEntry(hash)}\n## Scratch notes\n\nnot an entry\n` });
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 0, r.output);
   assert.match(r.output, /warning: Heading "Scratch notes" is not an entry/);
 });
 
-test('check rejects an unreadable .ledgerrc.json instead of ignoring it', () => {
+test('check rejects an unreadable .logbookrc.json instead of ignoring it', () => {
   const dir = h.makeRepo();
-  h.setupLedger(dir, { hash: h.headHash(dir) });
-  h.write(dir, '.ledgerrc.json', '{ not json');
+  h.setupLogbook(dir, { hash: h.headHash(dir) });
+  h.write(dir, '.logbookrc.json', '{ not json');
   const r = h.run(dir, ['check']);
   assert.strictEqual(r.status, 1, r.output);
-  assert.match(r.output, /\.ledgerrc\.json is not valid JSON/);
+  assert.match(r.output, /\.logbookrc\.json is not valid JSON/);
 });

@@ -1,7 +1,7 @@
 'use strict';
 
 // Shared setup for the CLI tests. Every test builds a real git repository in a
-// temporary directory and drives bin/ledger.js as a child process, so the tests
+// temporary directory and drives bin/logbook.js as a child process, so the tests
 // exercise the same code path a user gets.
 
 const { spawnSync, execFileSync } = require('node:child_process');
@@ -9,18 +9,18 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const BIN = path.join(__dirname, '..', 'bin', 'ledger.js');
+const BIN = path.join(__dirname, '..', 'bin', 'logbook.js');
 
 function git(dir, args) {
   return execFileSync('git', args, { cwd: dir, encoding: 'utf8' });
 }
 
 function makeRepo({ initGit = true, initialCommit = true } = {}) {
-  const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'agent-ledger-test-'));
+  const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'agent-logbook-test-'));
   if (initGit) {
     git(dir, ['init', '-q', '-b', 'main', '.']);
     git(dir, ['config', 'user.email', 'test@example.com']);
-    git(dir, ['config', 'user.name', 'ledger test']);
+    git(dir, ['config', 'user.name', 'logbook test']);
     git(dir, ['config', 'commit.gpgsign', 'false']);
   }
   fs.writeFileSync(path.join(dir, 'app.js'), "console.log('hello');\n");
@@ -56,8 +56,8 @@ function read(dir, relPath) {
   return fs.readFileSync(path.join(dir, relPath), 'utf8');
 }
 
-function ledgerFile(indexRows = []) {
-  return `# Ledger
+function logbookFile(indexRows = []) {
+  return `# Logbook
 
 ## Document index
 
@@ -66,7 +66,7 @@ function ledgerFile(indexRows = []) {
 ${indexRows.map((r) => `${r}\n`).join('')}
 ## Change log
 
-- Ledger created.
+- Logbook created.
 `;
 }
 
@@ -96,8 +96,8 @@ function journalFile(hash, opts) {
   return `# Journal ${date}\n\n${goodEntry(hash, opts)}`;
 }
 
-function setupLedger(dir, { hash, entry, indexRows, date = '2026-08-31' } = {}) {
-  write(dir, 'LEDGER.md', ledgerFile(indexRows));
+function setupLogbook(dir, { hash, entry, indexRows, date = '2026-08-31' } = {}) {
+  write(dir, 'LOGBOOK.md', logbookFile(indexRows));
   fs.mkdirSync(path.join(dir, 'journal'), { recursive: true });
   const body = entry !== undefined ? entry : goodEntry(hash, { date });
   write(dir, `journal/${date}.md`, `# Journal ${date}\n\n${body}`);
@@ -111,8 +111,8 @@ module.exports = {
   run,
   write,
   read,
-  ledgerFile,
+  logbookFile,
   goodEntry,
   journalFile,
-  setupLedger,
+  setupLogbook,
 };

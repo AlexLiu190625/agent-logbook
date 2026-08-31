@@ -1,4 +1,4 @@
-# Ledger
+# Logbook
 
 Working state for this repository: what was decided, what was verified, and
 where the long documents live.
@@ -6,6 +6,8 @@ where the long documents live.
 Daily entries live in `journal/YYYY-MM-DD.md`. Entries are append-only. A past
 entry is never edited; when a conclusion turns out to be wrong, a new entry
 with a `Corrects:` field supersedes it.
+
+This project keeps its own logbook, and its CI runs its own checker over it.
 
 ## Document index
 
@@ -15,9 +17,10 @@ it still holds.
 
 | Document | Conclusion | Status |
 | --- | --- | --- |
+| [docs/FORMAT.md](docs/FORMAT.md) | The authoritative entry syntax; the checker implements exactly this | current |
 
 ## Change log
 
 One line per meaningful change to this file.
 
-- Ledger created.
+- 2026-08-31 Logbook created; document index points at the format spec.

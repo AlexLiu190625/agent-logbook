@@ -1,14 +1,14 @@
 {
-  "name": "agent-ledger",
+  "name": "agent-logbook",
   "version": "0.1.0",
-  "description": "A plain-markdown work ledger for AI coding sessions, with a checker that keeps it honest.",
+  "description": "A plain-markdown work logbook for AI coding sessions, with a checker that keeps it honest.",
   "license": "MIT",
   "type": "commonjs",
   "engines": {
     "node": ">=18"
   },
   "bin": {
-    "ledger": "bin/ledger.js"
+    "logbook": "bin/logbook.js"
   },
   "main": "lib/index.js",
   "files": [
@@ -23,7 +23,7 @@
     "test": "node --test"
   },
   "keywords": [
-    "ledger",
+    "logbook",
     "journal",
     "ai",
     "coding-agent",

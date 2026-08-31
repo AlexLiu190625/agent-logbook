@@ -1,18 +1,18 @@
-# Ledger format
+# Logbook format
 
-This is the authoritative definition of the ledger file syntax. `ledger check`
+This is the authoritative definition of the logbook file syntax. `logbook check`
 implements exactly what is written here; where the checker and this document
 disagree, this document is the bug report.
 
-Everything is plain Markdown. A ledger renders correctly on GitHub, reads
+Everything is plain Markdown. A logbook renders correctly on GitHub, reads
 correctly in a text editor, and diffs correctly in git.
 
 ## Layout
 
 ```
-LEDGER.md              the standing summary: document index and change log
+LOGBOOK.md             the standing summary: document index and change log
 journal/YYYY-MM-DD.md  entries written on that date, append-only
-.ledgerrc.json         optional configuration
+.logbookrc.json        optional configuration
 ```
 
 `journal/` holds one file per calendar date. A date file may hold any number of
@@ -52,7 +52,7 @@ The separator is one or more of `-`, `–`, `—`, or `:`. The time is optional 
 useful only when one date carries many entries.
 
 A level-two heading that does not start with a date is ordinary prose, not an
-entry, so a journal file can also hold plain sections. `ledger check` prints a
+entry, so a journal file can also hold plain sections. `logbook check` prints a
 warning for such headings inside `journal/`, because the usual cause is a typo
 in a date that would otherwise make an entry silently invisible.
 
@@ -72,7 +72,7 @@ field ends where the next field or the next heading begins.
 | `Next:` | no | The next step. |
 
 Field names are matched case-insensitively. A line like `Note:` that is not one
-of these names is ignored, and `ledger check` warns about it so that a
+of these names is ignored, and `logbook check` warns about it so that a
 misspelled `Fact:` cannot quietly disable the source requirement.
 
 Fenced code blocks are inert: headings, bullets, and field keywords inside them
@@ -94,7 +94,7 @@ A hash in another repository is written `repo-name@hash`:
 Baseline: a1b2c3d, upstream-sdk@9f8e7d6
 ```
 
-`ledger check` verifies hashes in the current repository and reports the
+`logbook check` verifies hashes in the current repository and reports the
 external ones as skipped, because it has no copy of that other repository.
 
 ## The Facts field and the source tag
@@ -154,12 +154,12 @@ Decision:
 ```
 
 The `Corrects:` value repeats the target entry's heading text: the date, a
-separator, and the topic. `ledger check` resolves it against the journal and
+separator, and the topic. `logbook check` resolves it against the journal and
 fails when no such entry exists.
 
-## LEDGER.md
+## LOGBOOK.md
 
-`LEDGER.md` carries two sections that the checker knows about.
+`LOGBOOK.md` carries two sections that the checker knows about.
 
 **`## Document index`** registers every long document that lives outside the
 journal, so that a reader who has never seen the repository can find it and know
@@ -173,23 +173,23 @@ whether it still holds. The first column carries the path; the rest is free.
 | [reviews/2026-08-31-storage.md](reviews/2026-08-31-storage.md) | SQLite is fast enough at our write volume | superseded 2026-09-02 |
 ```
 
-**`## Change log`** is an append region for one-line notes about the ledger
+**`## Change log`** is an append region for one-line notes about the logbook
 itself. No rule inspects it.
 
 ## Links
 
 Relative links resolve against the file that contains them, exactly as GitHub
 renders them. A link from `journal/2026-08-31.md` to a review therefore reads
-`../reviews/storage.md`. When a link would only resolve from the ledger root,
-`ledger check` says so and prints the path to write instead.
+`../reviews/storage.md`. When a link would only resolve from the logbook root,
+`logbook check` says so and prints the path to write instead.
 
-Absolute-looking targets such as `/docs/FORMAT.md` resolve from the ledger root.
+Absolute-looking targets such as `/docs/FORMAT.md` resolve from the logbook root.
 Targets with a scheme (`https:`, `mailto:`) and bare anchors (`#section`) are
 left alone.
 
 ## Configuration
 
-`.ledgerrc.json` at the ledger root is optional.
+`.logbookrc.json` at the logbook root is optional.
 
 ```json
 {
@@ -220,9 +220,9 @@ unrecognised field name — do not.
 
 ## What the format deliberately leaves out
 
-`ledger check` does not verify that a path inside a `(src: ...)` tag exists,
+`logbook check` does not verify that a path inside a `(src: ...)` tag exists,
 because a source may equally be a command or a URL, and guessing which is which
 turns a discipline tool into a source of false alarms. It does not re-run the
 commands quoted in sources. It does not check that an entry's prose matches its
-baseline. Those are judgements for a reader, and the ledger exists to give that
+baseline. Those are judgements for a reader, and the logbook exists to give that
 reader something to judge.

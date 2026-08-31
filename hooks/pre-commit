@@ -1,29 +1,29 @@
 #!/bin/sh
 #
-# agent-ledger pre-commit hook.
+# agent-logbook pre-commit hook.
 #
 # Install:
 #   cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 #
-# The hook runs `ledger check` against the working tree. Because R5 compares
+# The hook runs `logbook check` against the working tree. Because R5 compares
 # journal files with their committed versions, it catches a rewrite of history
 # before that rewrite becomes a commit.
 
-if [ -x "./node_modules/.bin/ledger" ]; then
-  LEDGER="./node_modules/.bin/ledger"
-elif command -v ledger >/dev/null 2>&1; then
-  LEDGER="ledger"
+if [ -x "./node_modules/.bin/logbook" ]; then
+  LOGBOOK="./node_modules/.bin/logbook"
+elif command -v logbook >/dev/null 2>&1; then
+  LOGBOOK="logbook"
 else
   # Fail closed, but say what is actually wrong: a missing checker is not the
-  # same thing as a ledger that failed its rules.
-  echo "Commit stopped: agent-ledger is not installed, so the ledger cannot be checked."
-  echo "Install it with 'npm install --save-dev agent-ledger', or delete .git/hooks/pre-commit."
+  # same thing as a logbook that failed its rules.
+  echo "Commit stopped: agent-logbook is not installed, so the logbook cannot be checked."
+  echo "Install it with 'npm install --save-dev agent-logbook', or delete .git/hooks/pre-commit."
   exit 1
 fi
 
-if ! $LEDGER check; then
+if ! $LOGBOOK check; then
   echo
-  echo "Commit stopped: the ledger does not pass its own rules."
+  echo "Commit stopped: the logbook does not pass its own rules."
   echo "Fix the problems above, or commit with --no-verify if you know why you are skipping this."
   exit 1
 fi

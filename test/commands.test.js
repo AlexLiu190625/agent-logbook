@@ -6,24 +6,24 @@ const fs = require('node:fs');
 const path = require('node:path');
 const h = require('./helpers');
 
-test('init creates the ledger and the journal directory', () => {
+test('init creates the logbook and the journal directory', () => {
   const dir = h.makeRepo();
   const r = h.run(dir, ['init']);
   assert.strictEqual(r.status, 0, r.output);
-  assert.ok(fs.existsSync(path.join(dir, 'LEDGER.md')));
+  assert.ok(fs.existsSync(path.join(dir, 'LOGBOOK.md')));
   assert.ok(fs.existsSync(path.join(dir, 'journal')));
-  assert.match(h.read(dir, 'LEDGER.md'), /## Document index/);
+  assert.match(h.read(dir, 'LOGBOOK.md'), /## Document index/);
 });
 
-test('init refuses to overwrite an existing ledger', () => {
+test('init refuses to overwrite an existing logbook', () => {
   const dir = h.makeRepo();
   assert.strictEqual(h.run(dir, ['init']).status, 0);
-  h.write(dir, 'LEDGER.md', '# my own ledger\n');
+  h.write(dir, 'LOGBOOK.md', '# my own logbook\n');
   const r = h.run(dir, ['init']);
   assert.strictEqual(r.status, 1);
   assert.match(r.output, /refused/);
-  assert.match(r.output, /LEDGER\.md/);
-  assert.strictEqual(h.read(dir, 'LEDGER.md'), '# my own ledger\n');
+  assert.match(r.output, /LOGBOOK\.md/);
+  assert.strictEqual(h.read(dir, 'LOGBOOK.md'), '# my own logbook\n');
 });
 
 test('add appends entries to today\'s journal file', () => {
@@ -42,16 +42,16 @@ test('add appends entries to today\'s journal file', () => {
   assert.strictEqual(text.match(/^## /gm).length, 2);
 });
 
-test('add refuses to run outside a ledger', () => {
+test('add refuses to run outside a logbook', () => {
   const dir = h.makeRepo();
   const r = h.run(dir, ['add', 'nothing to append to']);
   assert.strictEqual(r.status, 1);
-  assert.match(r.output, /ledger init/);
+  assert.match(r.output, /logbook init/);
 });
 
-test('check finds the ledger from a subdirectory', () => {
+test('check finds the logbook from a subdirectory', () => {
   const dir = h.makeRepo();
-  h.setupLedger(dir, { hash: h.headHash(dir) });
+  h.setupLogbook(dir, { hash: h.headHash(dir) });
   fs.mkdirSync(path.join(dir, 'src', 'deep'), { recursive: true });
   const r = h.run(path.join(dir, 'src', 'deep'), ['check']);
   assert.strictEqual(r.status, 0, r.output);

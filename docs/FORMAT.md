@@ -42,7 +42,7 @@ Next:
 - Measure the real write rate before the next release.
 ```
 
-### The heading
+## The entry heading
 
 ```
 ## <YYYY-MM-DD> [HH:MM] <separator> <topic>
@@ -56,7 +56,7 @@ entry, so a journal file can also hold plain sections. `ledger check` prints a
 warning for such headings inside `journal/`, because the usual cause is a typo
 in a date that would otherwise make an entry silently invisible.
 
-### Fields
+## Entry fields
 
 A field is a keyword at the start of a line, followed by a colon. Its value is
 either the rest of that line, or the bullet list that follows it, or both. A
@@ -78,7 +78,7 @@ misspelled `Fact:` cannot quietly disable the source requirement.
 Fenced code blocks are inert: headings, bullets, and field keywords inside them
 are text, so a pasted terminal transcript cannot be mistaken for structure.
 
-### `Baseline:`
+## The Baseline field
 
 One or more commit hashes, 7 to 40 hexadecimal characters, separated by
 whitespace, commas, or bullets.
@@ -97,7 +97,7 @@ Baseline: a1b2c3d, upstream-sdk@9f8e7d6
 `ledger check` verifies hashes in the current repository and reports the
 external ones as skipped, because it has no copy of that other repository.
 
-### `Facts:` and the source tag
+## The Facts field and the source tag
 
 Every item under `Facts:` ends with a source tag:
 
@@ -133,7 +133,7 @@ the split: the reader can tell at a glance which lines were verified. When a
 claim has no source, it belongs under `Assumptions:`, not under `Facts:` with a
 vague tag.
 
-### Correction entries
+## Correction entries
 
 History is never edited. When a conclusion turns out to be wrong, a new entry
 supersedes it:

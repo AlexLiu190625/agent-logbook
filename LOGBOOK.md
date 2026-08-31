@@ -1,6 +1,6 @@
 # Logbook
 
-Status: Published on GitHub at 0.1.0 and not yet on npm; the format, the five
+Status: Published on GitHub and npm at 0.1.0; the format, the five
 rules and the `--require-entry-since` delivery gate are in place, and the open
 question is whether the gate is bearable in daily use.
 
@@ -44,3 +44,4 @@ One line per meaningful change to this file.
   `--require-entry-since` delivery gate and the `hooks/pre-push` sample that
   drives it; wrote R5's history-rewrite exception into
   [docs/FORMAT.md](docs/FORMAT.md).
+- 2026-08-31 Published 0.1.0 to npm; npx install path verified.

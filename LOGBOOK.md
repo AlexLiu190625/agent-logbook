@@ -24,3 +24,6 @@ it still holds.
 One line per meaningful change to this file.
 
 - 2026-08-31 Logbook created; document index points at the format spec.
+- 2026-08-31 Renamed from agent-ledger to agent-logbook; this file was
+  `LEDGER.md` and the command was `ledger`. See the correction entry in
+  [journal/2026-08-31.md](journal/2026-08-31.md).

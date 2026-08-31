@@ -45,3 +45,7 @@ One line per meaningful change to this file.
   drives it; wrote R5's history-rewrite exception into
   [docs/FORMAT.md](docs/FORMAT.md).
 - 2026-08-31 Published 0.1.0 to npm; npx install path verified.
+- 2026-08-31 The README now opens with `assets/demo.gif`, a recorded session of
+  the checker refusing an unfilled entry and then a quietly reworded committed
+  one. What the recording leaves out, and why, is in
+  [journal/2026-08-31.md](journal/2026-08-31.md).

@@ -23,6 +23,11 @@ the same diff.
 There is no server, no database, and no retrieval index. There is a directory of
 markdown files and a script that refuses to let them lie.
 
+![A terminal session: logbook init and logbook add create an entry, logbook check
+refuses it because the baseline is a placeholder and a fact has no source, the
+filled-in entry passes and is committed, and a later edit to that committed entry
+is rejected as a rewrite of history.](assets/demo.gif)
+
 ## What a logbook looks like
 
 `logbook init` creates `LOGBOOK.md` and `journal/`. Entries go in daily files:

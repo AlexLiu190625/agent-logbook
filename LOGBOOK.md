@@ -1,11 +1,19 @@
 # Logbook
 
+Status: Published on GitHub at 0.1.0 and not yet on npm; the format, the five
+rules and the `--require-entry-since` delivery gate are in place, and the open
+question is whether the gate is bearable in daily use.
+
 Working state for this repository: what was decided, what was verified, and
 where the long documents live.
 
 Daily entries live in `journal/YYYY-MM-DD.md`. Entries are append-only. A past
 entry is never edited; when a conclusion turns out to be wrong, a new entry
 with a `Corrects:` field supersedes it.
+
+This file is the opposite: it is meant to be overwritten. `Status:` above is the
+one line that always describes now, which is why it lives here rather than in a
+journal entry, where it would be frozen at the moment it was written.
 
 This project keeps its own logbook, and its CI runs its own checker over it.
 
@@ -31,3 +39,8 @@ One line per meaningful change to this file.
 - 2026-08-31 Commit authorship rewritten and force-pushed after a wrong
   repo-local git identity; baselines in earlier entries remapped in the same
   rewrite.
+- 2026-08-31 Added a `Status:` line at the top of this file, the one line here
+  that is rewritten rather than appended to. Added the
+  `--require-entry-since` delivery gate and the `hooks/pre-push` sample that
+  drives it; wrote R5's history-rewrite exception into
+  [docs/FORMAT.md](docs/FORMAT.md).

@@ -1,0 +1,34 @@
+{
+  "name": "agent-ledger",
+  "version": "0.1.0",
+  "description": "A plain-markdown work ledger for AI coding sessions, with a checker that keeps it honest.",
+  "license": "MIT",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "ledger": "bin/ledger.js"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "bin",
+    "lib",
+    "templates",
+    "hooks",
+    "skills",
+    "docs"
+  ],
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "keywords": [
+    "ledger",
+    "journal",
+    "ai",
+    "coding-agent",
+    "claude-code",
+    "provenance",
+    "markdown"
+  ]
+}
